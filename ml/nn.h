@@ -1,26 +1,23 @@
-#ifndef SNOOPY_MATRIX_NN_H
-#define SNOOPY_MATRIX_NN_H
+#ifndef SNOOPY_ML_NN_H
+#define SNOOPY_ML_NN_H
 
-#include <iostream>
 #include <vector>
 #include <unordered_map>
 #include "layer.h"
-#include "../common/utils.h"
-#include "../matrix/matrix_blob.h"
-#include "../proto/snoopy.pb.h"
+
+namespace snoopy {
+namespace ml {
 
 //using namespace std;
 using std::shared_ptr;
 using std::vector;
 using std::string;
-namespace snoopy {
-namespace ml {
 
 template<typename DataType>
 class NeuralNet {
 public:
-  explicit NeuralNet();
-  explicit ~NeuralNet();
+  NeuralNet() {}
+  ~NeuralNet() {}
   /**
    * create net from net parameter 
    *

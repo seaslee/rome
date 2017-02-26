@@ -1,7 +1,7 @@
 # project 
 project(snoopy)
 cmake_minimum_required(VERSION 3.6) 
-option(test "Build all tests." OFF)
+option(test "Build all tests." ON)
 
 set(CMAKE_SOURCE_DIR .)
 set(CMAKE_MODULE_PATH ${CMAKE_ROOT}/Modules ${CMAKE_SOURCE_DIR}/cmake/modules) 
@@ -18,10 +18,11 @@ add_subdirectory(common)
 add_subdirectory(matrix)
 add_subdirectory(storage)
 add_subdirectory(ml)
+add_subdirectory(test)
 
 
 # 指定生成目标
-add_executable(main  main.cpp)
+#add_executable(main  main.cpp)
 
 ##openblas
 find_package(libOpenBlas REQUIRED)
@@ -29,16 +30,18 @@ mark_as_advanced(
     OpenBlas_INCLUDE_DIR
     OpenBlas_LIBRARIES 
 )
-if (OpenBlas_INCLUDE_DIR AND OpenBlas_LIBRARIES)
-  include_directories(${OpenBlas_INCLUDE_DIR})
-  target_link_libraries(main ${OpenBlas_LIBRARIES})
-endif (OpenBlas_INCLUDE_DIR AND OpenBlas_LIBRARIES)
+#if (OpenBlas_INCLUDE_DIR AND OpenBlas_LIBRARIES)
+#  include_directories(${OpenBlas_INCLUDE_DIR})
+#  target_link_libraries(main ${OpenBlas_LIBRARIES})
+#endif (OpenBlas_INCLUDE_DIR AND OpenBlas_LIBRARIES)
 
 
+message("!!!!!!!")
 ################
 #test
 ################
-if (test) 
+#if (test) 
+message("enter test")
 add_executable(matrix_test  test/matrix_test.cc)
 add_executable(layer_test  test/layer_test.cc)
 include_directories(${OpenBlas_INCLUDE_DIR})
@@ -57,7 +60,7 @@ include(ExternalProject)
 ExternalProject_Add(
     gtest
     URL https://github.com/google/googletest/archive/master.zip
-    URL_HASH MD5=d87f3b2bd89c7df3841fb2c9e0b51b6e
+    #URL_HASH MD5=d87f3b2bd89c7df3841fb2c9e0b51b6e
     PREFIX ${CMAKE_CURRENT_BINARY_DIR}/gtest
     # Disable install step
     INSTALL_COMMAND ""
@@ -90,4 +93,4 @@ set_target_properties(libgmock PROPERTIES
 include_directories("${source_dir}/googletest/include"
                     "${source_dir}/googlemock/include")
 
-endif()
+#endif()

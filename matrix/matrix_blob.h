@@ -68,7 +68,7 @@ namespace matrix {
           dims_(sp.dim_size()),
           start_(0) {
           shape_ = new size_t[dims_];
-          for(int i = 0; i < sp.size(); ++i) {
+          for(int i = 0; i < sp.dim_size(); ++i) {
               size_ *= sp.dim(i);
               shape_[i] = sp.dim(i);
           }
@@ -308,7 +308,7 @@ namespace matrix {
     template<typename DataType>
     shared_ptr<Blob<DataType> > create_blob_object(const BlobShapeProto & bsp, bool is_create_diff) {   
         BlobShape bs(bsp);
-        create_blob_object(bs, is_create_diff);
+        create_blob_object<DataType>(bs, is_create_diff);
     } 
 
 
