@@ -1,0 +1,7 @@
+# 查找当前目录下的源文件
+AUX_SOURCE_DIRECTORY(. DIR_MATRIX_SRCS)
+
+# 添加链接库
+#ADD_LIBRARY( matrix ${DIR_MATRIX_SRCS} )
+#TARGET_LINK_LIBRARIES(storage)
+

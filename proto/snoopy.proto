@@ -1,0 +1,99 @@
+syntax = "proto2";
+
+package snoopy;
+
+//blob shape
+message BlobShapeProto {
+    repeated int32 dim = 1;
+}
+
+//blob
+message BlobParameter {
+    optional BlobShapeProto shape = 1;
+    repeated float data = 2;
+    repeated float diff = 3;
+}
+
+//net type
+enum Phrase {
+    TRAIN = 1;
+    TEST = 2;
+}
+
+message State {
+    optional Phrase netphrase = 1;
+}
+
+
+//learn rate parameter
+message LearnRateParameter {
+    optional float lr_multi = 1;
+    optional float lr_delay = 2;
+}
+
+message DataFeedParameter {
+    required string filepath = 1;
+    required int32 slot_capicity = 2;
+    optional int32 slot_size = 3;
+    optional int32 batch_size = 4;
+    optional int32 max_line = 5;
+} 
+
+//layer parameter
+message LayerParameter {
+    //layer name
+    optional string name = 1;
+    //layer type
+    optional string type = 2;
+    //layer bottom name
+    optional string bottom = 3;
+    //layer bottom shape
+    optional BlobShapeProto b_blob_shape = 4;
+    //layer top name
+    optional string top = 5;
+    //layer bottom shape
+    optional BlobShapeProto t_blob_shape = 6;
+    //phrase, train or predict
+    optional Phrase phrase = 7;
+    //blob parameter
+    repeated BlobParameter blob = 8;
+    //learn parameter
+    optional LearnRateParameter lr = 9;
+    //bottom blob name
+    repeated string b_blob_name = 10;
+    //top blob name
+    repeated string t_blob_name = 11;
+    
+    //loss weight
+    optional float loss_weight = 12;
+    //the layer is need to bp
+    optional bool is_bp = 13 [default=false];
+    
+    //specified layer parameter
+    optional FCLayerParameter fc_param = 100;
+    optional EmbeddingParameter emb_param = 101;
+}
+
+message FCLayerParameter {
+    optional int32 in_nodes_dim = 1;
+    optional int32 out_nodes_dim = 2;
+}
+
+message EmbeddingParameter {
+    required int32 slot_capicity = 1;
+} 
+
+//net parameter
+message NetParameter {
+    //network name
+    optional string name = 1; 
+    //network state
+    optional State state = 2;
+    //batch size
+    optional int32 batch_size = 3;
+    //network layer parameter
+    repeated LayerParameter layer_param= 4;
+}
+
+
+
