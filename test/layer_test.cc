@@ -7,6 +7,7 @@
 #include "../ml/emb_layer.h"
 #include "../ml/vsum_layer.h"
 #include "../ml/softmax_with_loss_layer.h"
+#include "../ml/nn.h"
 
 using namespace snoopy::ml;
 using namespace snoopy;
@@ -368,3 +369,7 @@ TEST(SoftmaxLayer, forward_backward) {
 
 }
 
+TEST(NeuralNet, forward_backward) {
+    NeuralNet<float> nn;
+
+}

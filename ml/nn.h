@@ -27,7 +27,7 @@ public:
   /**
    * perform the forward process to compute the output of each layer
    */
-  const vector<Blob<DataType> *>& forward(DataType * loss);
+  void forward(DataType * loss);
   
   /**
    * compute the gradient w.r.t the parameter
@@ -63,9 +63,16 @@ public:
    * recore the input blob for each layer
    */
   vector<vector<Blob<DataType> * > > bottom_blobs_;
-  vector<int> bottom_blob_ids_;
-  vector<bool> bottom_blob_need_bp_;
+  vector<vector<int> > bottom_blob_ids_;
+  vector<vector<bool> > bottom_blob_need_bp_;
 
+  /**
+   * recore the output blob for each layer
+   */
+  vector<vector<Blob<DataType> * > > top_blobs_;
+  vector<vector<int> > top_blob_ids_;
+  vector<vector<bool> >top_blob_need_bp_;
+  
   /**
    * input and output blob
    */

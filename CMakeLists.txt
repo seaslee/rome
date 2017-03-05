@@ -17,6 +17,7 @@ add_subdirectory(proto)
 add_subdirectory(common)
 add_subdirectory(matrix)
 add_subdirectory(storage)
+add_subdirectory(io)
 add_subdirectory(ml)
 add_subdirectory(test)
 
@@ -36,19 +37,21 @@ mark_as_advanced(
 #endif (OpenBlas_INCLUDE_DIR AND OpenBlas_LIBRARIES)
 
 
-message("!!!!!!!")
 ################
 #test
 ################
 #if (test) 
 message("enter test")
+add_executable(io_test  test/io_test.cc)
 add_executable(matrix_test  test/matrix_test.cc)
 add_executable(layer_test  test/layer_test.cc)
 include_directories(${OpenBlas_INCLUDE_DIR})
 target_link_libraries(matrix_test ${OpenBlas_LIBRARIES} libgtest )
+add_dependencies(io_test snoopy_proto )
 add_dependencies(ml snoopy_proto )
 add_dependencies(layer_test snoopy_proto )
 target_link_libraries(layer_test ${OpenBlas_LIBRARIES} libgtest ml snoopy_proto)
+target_link_libraries(io_test libgtest snoopy_proto)
 
 # We need thread support
 find_package(Threads REQUIRED)
@@ -60,7 +63,7 @@ include(ExternalProject)
 ExternalProject_Add(
     gtest
     URL https://github.com/google/googletest/archive/master.zip
-    #URL_HASH MD5=d87f3b2bd89c7df3841fb2c9e0b51b6e
+    URL_HASH MD5=f11fd26a2a2a2ef6f233d13c64b6ca2b
     PREFIX ${CMAKE_CURRENT_BINARY_DIR}/gtest
     # Disable install step
     INSTALL_COMMAND ""

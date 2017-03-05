@@ -1,0 +1,5 @@
+# 查找当前目录下的源文件
+AUX_SOURCE_DIRECTORY(. DIR_IO_SRCS)
+
+# 添加链接库
+#ADD_LIBRARY(io ${DIR_IO_SRCS})
