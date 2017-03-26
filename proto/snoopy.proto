@@ -50,11 +50,11 @@ message LayerParameter {
     //layer bottom name
     optional string bottom = 3;
     //layer bottom shape
-    optional BlobShapeProto b_blob_shape = 4;
+    repeated BlobShapeProto b_blob_shape = 4;
     //layer top name
     optional string top = 5;
     //layer bottom shape
-    optional BlobShapeProto t_blob_shape = 6;
+    repeated BlobShapeProto t_blob_shape = 6;
     //phrase, train or predict
     optional Phrase phrase = 7;
     //blob parameter

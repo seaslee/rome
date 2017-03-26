@@ -3,6 +3,7 @@
 #include <gtest/gtest.h> 
 #include "../proto/snoopy.pb.h"
 #include "../io/text_data.h"
+#include "../io/get_conf.h"
 
 using namespace snoopy::io;
 using namespace snoopy;
@@ -57,3 +58,8 @@ TEST(TextDataFeed, get_data) {
      EXPECT_EQ(out3, exp_out3);
 }
 
+TEST(read_net_proto, get_data) {
+    NetParameter net_p;
+    int status = read_net_proto_from_text_file("./net_demo.proto.txt", net_p);
+    EXPECT_EQ(status, snoopy::SUCCESS);
+}

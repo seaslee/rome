@@ -8,6 +8,7 @@
 #include "../ml/vsum_layer.h"
 #include "../ml/softmax_with_loss_layer.h"
 #include "../ml/nn.h"
+#include "../io/get_conf.h"
 
 using namespace snoopy::ml;
 using namespace snoopy;
@@ -324,7 +325,7 @@ TEST(SoftmaxLayer, forward_backward) {
 
   Layer<float> * softmax_with_loss_layer = new SoftmaxWithLossLayer<float>(lp);
   BlobShape in_blob_shape1 {4, 3};
-  BlobShape in_blob_shape2 {1, 4};
+  BlobShape in_blob_shape2 {4, 1};
   BlobShape out_blob_shape {4, 3};
 
   shared_ptr<Blob<float> > in_blob1 = create_blob_object<float>(in_blob_shape1, true);
@@ -334,7 +335,7 @@ TEST(SoftmaxLayer, forward_backward) {
 
   shared_ptr<Blob<float> > in_blob2 = create_blob_object<float>(in_blob_shape2, true);
   Matrix<float, 2>  in_data_matrix2 = in_blob2->get_data()->flatten_2d_matrix();
-  Matrix<float, 2> tmp_in_data_matrix2 = {{1, 2, 1, 3}};
+  Matrix<float, 2> tmp_in_data_matrix2 = {{0}, {1}, {0}, {2}};
   in_data_matrix2.copy_from(tmp_in_data_matrix2);
 
   shared_ptr<Blob<float> > out_blob = create_blob_object<float>(out_blob_shape, true);
@@ -371,5 +372,16 @@ TEST(SoftmaxLayer, forward_backward) {
 
 TEST(NeuralNet, forward_backward) {
     NeuralNet<float> nn;
+    NetParameter net_p;
+    int status = snoopy::io::read_net_proto_from_text_file("./net_demo.proto.txt", net_p);
+    status = nn.init(net_p);
+    EXPECT_EQ(status, snoopy::SUCCESS);
+
+    float loss = 0;
+    nn.forward(&loss);
+    //EXPECT_EQ(status, snoopy::SUCCESS);
+
+    //nn.backprop();
+    //EXPECT_EQ(status, snoopy::SUCCESS);
 
 }

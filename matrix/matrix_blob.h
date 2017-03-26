@@ -308,7 +308,7 @@ namespace matrix {
     template<typename DataType>
     shared_ptr<Blob<DataType> > create_blob_object(const BlobShapeProto & bsp, bool is_create_diff) {   
         BlobShape bs(bsp);
-        create_blob_object<DataType>(bs, is_create_diff);
+        return create_blob_object<DataType>(bs, is_create_diff);
     } 
 
 

@@ -12,6 +12,7 @@ void SoftmaxWithLossLayer<DataType>::init_spec_layer(const vector<Blob<DataType>
     size_t output_blob_size = output_blob.size();
     CHECK_EQ(input_blob_size, 2);
     CHECK_EQ(output_blob_size, 1);
+    CHECK_EQ(input_blob[0]->get_blobshape(), output_blob[0]->get_blobshape());
 }
 
 template<typename DataType>
@@ -43,8 +44,15 @@ void SoftmaxWithLossLayer<DataType>::backward_cpu(const vector<Blob<DataType> *>
     size_t row_n = input_matrix.get_row();
     size_t col_n = input_matrix.get_column();
 
+    Matrix<DataType, 2> label_matrix = input_blob[1]->get_data()->flatten_2d_matrix();
+    size_t label_row_n = label_matrix.get_row();
+    size_t label_col_n = label_matrix.get_column(); 
+    CHECK_EQ(row_n, label_row_n);
+    CHECK_GE(label_col_n, 1);
+
     for (size_t index_sample = 0; index_sample < row_n; ++index_sample) {
-        int label = static_cast<int>(input_blob[1]->get_data_at(index_sample)) - 1;
+        //int label = static_cast<int>(input_blob[1]->get_data_at(index_sample)) - 1;
+        int label = static_cast<int>(label_matrix[index_sample][0]);
         for (size_t index_dim = 0; index_dim < col_n; ++index_dim) {
             if (label == index_dim) {
                 in_diff_matrix[index_sample][index_dim] = out_matrix[index_sample][index_dim] - 1;            
