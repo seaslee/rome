@@ -274,7 +274,7 @@ namespace matrix {
 
     //helper function to create Blob object from BlobParameter
     template<typename DataType>
-    shared_ptr<Blob<DataType> > create_blob_object(const BlobParameter & bp) {
+    shared_ptr<Blob<DataType> > create_blob_object(const BlobParameter & bp, bool is_create_diff) {
         vector<size_t> shape_vector;
         for (int i = 0; i < bp.shape().dim_size(); ++i) {
             shape_vector.push_back(bp.shape().dim(i));
@@ -293,7 +293,7 @@ namespace matrix {
                 }
             } 
         } else {
-            blob_ptr =  create_blob_object<DataType>(bs, false);
+            blob_ptr =  create_blob_object<DataType>(bs, is_create_diff);
             if (bp.data_size() > 0) {
                 //load
                 CHECK_EQ(blob_ptr->get_count(), bp.data_size());

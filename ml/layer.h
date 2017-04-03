@@ -19,7 +19,7 @@ public:
          if (layer_param_.blob_size() > 0) {
             param_blob_.resize(layer_param_.blob_size());            
             for (int i = 0; i < param_blob_.size(); ++i) {
-                param_blob_[i] = create_blob_object<DataType>(layer_param_.blob(i));
+                param_blob_[i] = create_blob_object<DataType>(layer_param_.blob(i), true);
             }
          }
      }
@@ -28,9 +28,10 @@ public:
 
      inline int init(const vector<Blob<DataType> *> & input_blob,
                     const vector<Blob<DataType> *> & output_blob) {
-         check_blob_count(input_blob, output_blob);
          init_spec_layer(input_blob, output_blob);
          reshape(input_blob, output_blob);
+         //make sure 
+         check_blob_count(input_blob, output_blob);
          return 0;
      }
 

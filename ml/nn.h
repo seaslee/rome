@@ -6,6 +6,7 @@
 #include "layer.h"
 #include "../common/com_def.h"
 #include "layer_factory.h"
+#include "data_layer.h"
 
 //using namespace std;
 using std::shared_ptr;
@@ -36,15 +37,38 @@ public:
    */
   void backprop();
 
-  /**
-   * update the parameter of net with computed gradient 
-   */
-  void update();
+  inline vector<Blob<DataType> * >&  get_input_blobs() {
+      return input_blobs_;
+  }
+
+  vector<Blob<DataType> * > & get_learnable_para_blobs() {
+    return learnable_para_blobs_;
+  }
+
+  vector<int> & get_learnable_para_ids() {
+    return learnable_para_ids_; 
+  }
+  vector<float> & get_learnable_para_lr() {
+    return learnable_para_lr_;
+  }
+  vector<bool> & get_has_learnable_para_lr() {
+    return has_learnable_para_lr_;
+  }
+
+  shared_ptr<Layer<DataType> > & get_input_feed() {
+    return input_feed_;
+  }
+
 
   private:
-  int _i;
   string net_name_; //!< network name
   Phrase net_type_; //!< train or test
+
+  /**
+   * input reader
+   */
+  shared_ptr<Layer<DataType> > input_feed_;
+  vector<Blob<DataType> * > input_blobs_;
 
   /**
    * layers
@@ -88,7 +112,7 @@ public:
    * parameters
    */
   vector<shared_ptr<Blob<DataType> > > para_blobs_;
-  vector<Blob<DataType> * > learnable_para_blobs_;
+  vector<Blob<DataType> * > learnable_para_blobs_; //defalut,learnable
 
   vector<int> learnable_para_ids_;
   vector<float> learnable_para_lr_;
@@ -122,21 +146,32 @@ int NeuralNet<DataType>::init(const NetParameter & para) {
         layer_names_.push_back(lp.name());
         layer_name_index_dict_[lp.name()] = layer_index;
         layer_need_bp_.push_back(lp.is_bp());
+
+        if (lp.has_data_param()) {
+           input_feed_ = layers_[layer_index]; // input handle pointer
+        }
+        cerr << lp.name() << endl;
     }
 
     //input data
     int net_blob_index(0);
-    for (int in_blob_index = 0; in_blob_index < para.input_param().slot_size(); ++ in_blob_index) {
-        BlobShape input_blob_shape {static_cast<unsigned long>(para.input_param().batch_size()), 
-                                    static_cast<unsigned long>(para.input_param().slot_capicity())};
-        shared_ptr<Blob<DataType> > input_blob = create_blob_object<DataType>(
-                input_blob_shape, false);
-        blob_.push_back(input_blob);
-        blob_name_index_dict_[para.input_param().t_blob_name()[in_blob_index]] = net_blob_index++;
-    }
-
     //layer output data
     for (int layer_index = 0; layer_index < para.layer_param_size(); ++layer_index) {
+        //input blob
+        if (para.layer_param(layer_index).has_data_param()) {
+            for (int in_blob_index = 0; in_blob_index < para.layer_param(layer_index).data_param().slot_size(); ++ in_blob_index) {
+                cerr << "in_blob_index: " << in_blob_index << endl;
+                BlobShape input_blob_shape {static_cast<unsigned long>(para.layer_param(layer_index).data_param().batch_size()), 
+                                            static_cast<unsigned long>(para.layer_param(layer_index).data_param().slot_capicity())};
+                shared_ptr<Blob<DataType> > input_blob = create_blob_object<DataType>(
+                        input_blob_shape, false);
+                blob_.push_back(input_blob);
+                blob_name_index_dict_[para.layer_param(layer_index).t_blob_name()[in_blob_index]] = net_blob_index++;
+                input_blobs_.push_back(input_blob.get());
+            }
+            continue;
+        }
+
         for (int t_blob_index = 0; t_blob_index < para.layer_param(layer_index).t_blob_name_size(); 
                 ++t_blob_index) {
             shared_ptr<Blob<DataType> > tmp_blob = create_blob_object<DataType>(
@@ -186,13 +221,22 @@ int NeuralNet<DataType>::init(const NetParameter & para) {
 
         bottom_blobs_.push_back(layer_bottom_blobs);
         top_blobs_.push_back(layer_top_blobs);
+
+        //init layers
+        cerr << "layer_index : " << layer_index << " !!!" << layer_bottom_blobs.size() << "  " << layer_top_blobs.size() << endl;
+        layers_[layer_index]->init(layer_bottom_blobs, layer_top_blobs);
     }
 
     //layer param data
+    size_t learnable_id(0);
     for (int layer_index = 0; layer_index < para.layer_param_size(); ++ layer_index) {
         for (int para_blob_index = 0; para_blob_index < layers_[layer_index]->get_param_blob().size(); 
                 ++para_blob_index) {
            para_blobs_.push_back(layers_[layer_index]->get_param_blob()[para_blob_index]);
+           learnable_para_blobs_.push_back(layers_[layer_index]->get_param_blob()[para_blob_index].get());
+           learnable_para_ids_.push_back(learnable_id);
+           learnable_para_lr_.push_back(para.layer_param(layer_index).lr().lr_multi());
+           has_learnable_para_lr_.push_back(true);
         }
     }
     return snoopy::SUCCESS;
@@ -215,13 +259,6 @@ void NeuralNet<DataType>::backprop() {
         layer->backward(bottom_blobs_[layer_index], need_bp, top_blobs_[layer_index]);
     }
 }
-
-template <typename DataType>
-void NeuralNet<DataType>::update() {
-    int i = 0;
-    return;
-}
-
 
 }
 }

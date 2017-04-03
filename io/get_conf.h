@@ -27,6 +27,22 @@ inline int read_net_proto_from_text_file(const string & f_name,
     }
     return snoopy::SUCCESS;
 }
+
+
+inline int read_solve_proto_from_text_file(const string & f_name, 
+                                SolverParameter & solver_param) {
+    int file_handle = open(f_name.c_str(), O_RDONLY);
+    if (!file_handle) {
+        LOG_FATAL << "solver configure file: " << f_name <<" not exists!";
+        return snoopy::FAILURE;
+    }
+    google::protobuf::io::FileInputStream file_input(file_handle);
+    if (!google::protobuf::TextFormat::Parse(&file_input, &solver_param)) {
+        LOG_FATAL << "net configure file: " << f_name <<" read failed!";
+        return snoopy::FAILURE;
+    }
+    return snoopy::SUCCESS;
+}
                                   
 }
 }

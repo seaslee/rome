@@ -32,13 +32,11 @@ message LearnRateParameter {
 }
 
 message DataFeedParameter {
-    required string filepath = 1;
-    required int32 slot_capicity = 2;
+    optional string filepath = 1;
+    optional int32 slot_capicity = 2;
     optional int32 slot_size = 3;
     optional int32 batch_size = 4;
     optional int32 max_line = 5;
-    //top blob name
-    repeated string t_blob_name = 7;
 } 
 
 //layer parameter
@@ -72,8 +70,9 @@ message LayerParameter {
     optional bool is_bp = 13 [default=false];
     
     //specified layer parameter
-    optional FCLayerParameter fc_param = 100;
-    optional EmbeddingParameter emb_param = 101;
+    optional DataFeedParameter data_param = 100;
+    optional FCLayerParameter fc_param = 101;
+    optional EmbeddingParameter emb_param = 102;
 }
 
 message FCLayerParameter {
@@ -83,7 +82,7 @@ message FCLayerParameter {
 
 message EmbeddingParameter {
     required int32 slot_capicity = 1;
-} 
+}
 
 
 //net parameter
@@ -95,7 +94,14 @@ message NetParameter {
     //batch size
     optional int32 batch_size = 3;
     //data feed
-    optional DataFeedParameter input_param = 4;
+    //optional DataFeedParameter input_param = 4;
     //network layer parameter
-    repeated LayerParameter layer_param= 5;
+    repeated LayerParameter layer_param= 4;
+}
+
+message SolverParameter {
+    //net name
+    optional string net = 1;
+    optional float base_lr = 2;
+    optional float momentum = 3;
 }

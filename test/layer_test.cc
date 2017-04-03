@@ -7,8 +7,10 @@
 #include "../ml/emb_layer.h"
 #include "../ml/vsum_layer.h"
 #include "../ml/softmax_with_loss_layer.h"
+#include "../ml/text_data_layer.h"
 #include "../ml/nn.h"
 #include "../io/get_conf.h"
+#include "../ml/sgd_solver.h"
 
 using namespace snoopy::ml;
 using namespace snoopy;
@@ -17,6 +19,63 @@ int main(int argc, char** argv) {
     testing::InitGoogleTest(&argc, argv); 
     // Runs all tests using Google Test. 
     return RUN_ALL_TESTS(); 
+}
+
+TEST(DataFeedLayer, get_data) {
+    LayerParameter lp;
+    lp.set_name("data1");
+    lp.set_type("TextDataFeed");
+    lp.set_bottom("data_bottom");
+    lp.set_top("data_top");
+    lp.set_phrase(TRAIN);
+
+    DataFeedParameter *dp = new DataFeedParameter;
+    dp->set_filepath("./data.txt");
+    dp->set_slot_capicity(5);
+    dp->set_slot_size(3);
+    dp->set_batch_size(4);
+    dp->set_max_line(1024);
+
+    lp.set_allocated_data_param(dp);
+
+    lp.add_t_blob_name("slot1");
+    lp.add_t_blob_name("slot2");
+    lp.add_t_blob_name("slot3");
+
+    Layer<float> * feed = new TextDataFeedLayer<float>(lp);
+    vector<Blob<float> *>  input_blob_vec;
+    vector<Blob<float> *>  output_blob_vec;
+    BlobShape out_blob_shape {static_cast<unsigned long>(dp->batch_size()), 
+                            static_cast<unsigned long>(dp->slot_capicity())};
+    shared_ptr<Blob<float> > out_blob1 = create_blob_object<float>(out_blob_shape, true);
+    shared_ptr<Blob<float> > out_blob2 = create_blob_object<float>(out_blob_shape, true);
+    shared_ptr<Blob<float> > out_blob3 = create_blob_object<float>(out_blob_shape, true);
+    output_blob_vec.push_back(out_blob1.get());
+    output_blob_vec.push_back(out_blob2.get());
+    output_blob_vec.push_back(out_blob3.get());
+    vector<bool> need_bp;
+
+    feed->init(input_blob_vec, output_blob_vec);
+    ((TextDataFeedLayer<float> *)feed)->read_file();
+    ((TextDataFeedLayer<float> *)feed)->get_data(output_blob_vec);
+    Matrix<float, 2> exp_out1 {{1,2,3,-1,-1},
+                              {1,2,3,-1,-1},
+                              {1,2,3,-1,-1},
+                              {1,2,3,-1,-1}};
+    Matrix<float, 2> exp_out2 {{4,5,6,-1,-1},
+                              {4,5,6,-1,-1},
+                              {4,5,6,-1,-1},
+                              {4,5,6,-1,-1}};
+    Matrix<float, 2> exp_out3 {{1,-1, -1,-1,-1},
+                              {1,-1,-1,-1,-1},
+                              {1,-1,-1,-1,-1},
+                              {1,-1,-1,-1,-1}};
+     Matrix<float, 2> out1 = output_blob_vec[0]->get_data()->flatten_2d_matrix();
+     Matrix<float, 2> out2 = output_blob_vec[1]->get_data()->flatten_2d_matrix();
+     Matrix<float, 2> out3 = output_blob_vec[2]->get_data()->flatten_2d_matrix();
+     EXPECT_EQ(out1, exp_out1);
+     EXPECT_EQ(out2, exp_out2);
+     EXPECT_EQ(out3, exp_out3);
 }
 
 TEST(FCLayer, forward_backward) {
@@ -101,6 +160,15 @@ TEST(FCLayer, forward_backward) {
                              {20,  28,  15,  17}};
   Matrix<float, 2> new_in_diff = in_blob->get_diff()->flatten_2d_matrix();
   EXPECT_EQ(new_in_diff, exp_diff);
+
+  Matrix<float, 2> exp_para_diff 
+    {{ 3,  7, 10, 14,  6},
+     { 7, 17, 25, 35, 16},
+     { 9, 22, 33, 48, 21},
+     {12, 29, 43, 62, 27}};
+  Matrix<float, 2> param_diff = fc_layer->get_param_blob()[0]->get_diff()->flatten_2d_matrix();
+  EXPECT_EQ(param_diff, exp_para_diff);
+
 }
 
 
@@ -380,8 +448,14 @@ TEST(NeuralNet, forward_backward) {
     float loss = 0;
     nn.forward(&loss);
     //EXPECT_EQ(status, snoopy::SUCCESS);
-
     //nn.backprop();
     //EXPECT_EQ(status, snoopy::SUCCESS);
+}
 
+TEST(SGDSolver, update) {
+    SGDSolver<float> sgd;
+    SolverParameter solve_p;
+    int status = snoopy::io::read_solve_proto_from_text_file("./solve_demo.proto.txt", solve_p);
+    status = sgd.init(solve_p);
+    EXPECT_EQ(status, snoopy::SUCCESS);
 }
