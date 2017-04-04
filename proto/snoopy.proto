@@ -104,4 +104,5 @@ message SolverParameter {
     optional string net = 1;
     optional float base_lr = 2;
     optional float momentum = 3;
+    optional float epochs = 4;
 }

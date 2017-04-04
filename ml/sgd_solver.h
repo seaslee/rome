@@ -47,7 +47,7 @@ class SGDSolver : public Solver<DataType> {
        shared_ptr<NeuralNet<DataType> > net_;
        float base_lr_;
        float momentum_;
-       int max_epochs;
+       int max_epochs_;
 };
 
 template <typename DataType>
@@ -61,7 +61,7 @@ int SGDSolver<DataType>::init(const SolverParameter & solver) {
     net_->init(net_p);
     base_lr_ = solver.base_lr();
     momentum_ = solver.momentum(); 
-
+    max_epochs_ = solver.epochs();
     return snoopy::SUCCESS;
 }
 
@@ -70,23 +70,29 @@ int SGDSolver<DataType>::update() {
     //mini-batch
     DataType loss = static_cast<DataType>(0);
     //create previos blob with momentum
-    vector<Matrix<DataType, 2> > history_param_matrix_vec;
-    vector<Matrix<DataType, 2> > deri_matrix_vec;
+    vector<shared_ptr<Blob<DataType> > > history_param_matrix_vec;
     vector<Blob<DataType> *> para_vector = net_->get_learnable_para_blobs();
     DataFeedLayer<DataType> * data_feed = static_cast<DataFeedLayer<DataType> *>(net_->get_input_feed().get());
 
     for (int para_index = 0; para_index < para_vector.size(); ++
             para_index) {
-       Matrix<DataType, 2> para_matrix =  para_vector[para_index]->get_data()->flatten_2d_matrix();
-       Matrix<DataType, 2> tmp_matrix(para_matrix.get_shape());
-       //clear tmp_matrix
-       history_param_matrix_vec.push_back(tmp_matrix);
-       Matrix<DataType,2 > derivate_matrix(para_matrix.get_shape());
-       deri_matrix_vec.push_back(derivate_matrix);
+        BlobShape blob_shape {static_cast<unsigned long>(para_vector[para_index]->dim_at(0)), 
+                                            static_cast<unsigned long>(para_vector[para_index]->dim_at(1))};
+       shared_ptr<Blob<DataType> > tmp = create_blob_object<DataType>(
+                blob_shape, true);
+       Matrix<DataType, 2> history_param_matrix = tmp->get_data()->flatten_2d_matrix();
+       Matrix<DataType, 2> derivate_matrix = tmp->get_diff()->flatten_2d_matrix();
+       history_param_matrix.clear_data();
+       derivate_matrix.clear_data();
+       history_param_matrix_vec.push_back(tmp);
     }
-    
-    for (int epoch_index = 0; epoch_index < max_epochs; ++epoch_index) {
+    //feed data
+    data_feed->read_file();
+
+    for (int epoch_index = 0; epoch_index < max_epochs_; ++epoch_index) {
+        cerr << "epoch_index: " << epoch_index << endl;
         for (int iter_index = 0; !data_feed->is_end(); ++iter_index) {
+            cerr << "epoch_index: " << epoch_index << " iter_index: " << iter_index << endl;
             data_feed->get_data(net_->get_input_blobs());
             net_->forward(&loss);
             net_->backprop();
@@ -95,14 +101,18 @@ int SGDSolver<DataType>::update() {
                     para_index) {
                Matrix<DataType, 2> para_matrix =  para_vector[para_index]->get_data()->flatten_2d_matrix();
                Matrix<DataType, 2> para_diff_matrix =  para_vector[para_index]->get_diff()->flatten_2d_matrix();
+               Matrix<DataType, 2> history_param_matrix = history_param_matrix_vec[para_index]->get_data()->flatten_2d_matrix();
+               Matrix<DataType, 2> derivate_matrix = history_param_matrix_vec[para_index]->get_diff()->flatten_2d_matrix();
 
-               deri_matrix_vec[para_index] = history_param_matrix_vec[para_index] * momentum_;
-               deri_matrix_vec[para_index] = deri_matrix_vec[para_index] - para_diff_matrix * 
+               derivate_matrix = history_param_matrix * momentum_;
+               derivate_matrix = derivate_matrix - para_diff_matrix * 
                    (base_lr_ * net_->get_learnable_para_lr()[para_index]);
-               para_matrix = para_matrix + deri_matrix_vec[para_index];  
-               history_param_matrix_vec[para_index].copy_from(deri_matrix_vec[para_index]);
+
+               para_matrix = para_matrix + derivate_matrix;  
+               history_param_matrix.copy_from(derivate_matrix);
             }
         }
+        data_feed->clear();
     }
 
     return snoopy::SUCCESS;

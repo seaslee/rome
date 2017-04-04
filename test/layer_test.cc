@@ -458,4 +458,8 @@ TEST(SGDSolver, update) {
     int status = snoopy::io::read_solve_proto_from_text_file("./solve_demo.proto.txt", solve_p);
     status = sgd.init(solve_p);
     EXPECT_EQ(status, snoopy::SUCCESS);
+
+    status = sgd.update();
+    EXPECT_EQ(status, snoopy::SUCCESS);
+
 }
