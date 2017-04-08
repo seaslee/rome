@@ -63,6 +63,17 @@ public:
     return input_feed_;
   }
 
+  vector<Blob<DataType> * > & get_output_blobs() {
+    return top_blobs_[top_blobs_.size() - 1];
+  }
+
+  Blob<DataType> * get_label_blob() {
+    if (bottom_blobs_[bottom_blobs_.size() - 1].size() > 1) {
+        return bottom_blobs_[bottom_blobs_.size() - 1][1];
+    } else {
+        return nullptr;
+    }
+  }
 
   private:
   string net_name_; //!< network name
