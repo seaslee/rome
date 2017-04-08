@@ -462,4 +462,7 @@ TEST(SGDSolver, update) {
     status = sgd.update();
     EXPECT_EQ(status, snoopy::SUCCESS);
 
+    status = sgd.save_model("test_model.bin");
+    EXPECT_EQ(status, snoopy::SUCCESS);
+
 }

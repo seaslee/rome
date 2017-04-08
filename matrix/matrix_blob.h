@@ -47,6 +47,7 @@ namespace matrix {
        {
            shape_ = new size_t[dims_];
            int i = 0;
+           size_ = 1;
            for (auto x : sp) {
                size_ *= x;
                shape_[i] = x;
@@ -58,6 +59,7 @@ namespace matrix {
           dims_(sp.size()),
           start_(0) {
           shape_ = new size_t[dims_];
+          size_ = 1;
           for(int i = 0; i < sp.size(); ++i) {
               size_ *= sp[i];
               shape_[i] = sp[i];
@@ -68,6 +70,7 @@ namespace matrix {
           dims_(sp.dim_size()),
           start_(0) {
           shape_ = new size_t[dims_];
+          size_ = 1;
           for(int i = 0; i < sp.dim_size(); ++i) {
               size_ *= sp.dim(i);
               shape_[i] = sp.dim(i);
@@ -209,6 +212,8 @@ namespace matrix {
 
        shared_ptr<MBlob<DataType> > get_data() {return data_;}
        shared_ptr<MBlob<DataType> > get_diff() {return diff_;}
+
+       void * get_raw_data() { return static_cast<void *>(data_->data_->data()); }
 
        void set_data(MBlob<DataType> * mb) {data_ = shared_ptr<MBlob<DataType> >(mb);}
        void set_diff(MBlob<DataType> * mb) {diff_ = shared_ptr<MBlob<DataType> > (mb);}

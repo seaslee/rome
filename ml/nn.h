@@ -41,6 +41,10 @@ public:
       return input_blobs_;
   }
 
+  vector<shared_ptr<Blob<DataType> > > & get_para_blobs () {
+    return para_blobs_;
+  }
+
   vector<Blob<DataType> * > & get_learnable_para_blobs() {
     return learnable_para_blobs_;
   }

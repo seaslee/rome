@@ -30,21 +30,10 @@ class SGDSolver : public Solver<DataType> {
         */
        virtual int update();
 
-       /**
-        * save model 
-        */
-       virtual int save_model();
-
-       /**
-        * evaluate model on the test data
-        */
-       virtual int evaluate_model();
-
        float get_base_lr() { return base_lr_; }
        float get_momentum() { return momentum_; }
 
     private:
-       shared_ptr<NeuralNet<DataType> > net_;
        float base_lr_;
        float momentum_;
        int max_epochs_;
@@ -52,13 +41,13 @@ class SGDSolver : public Solver<DataType> {
 
 template <typename DataType>
 int SGDSolver<DataType>::init(const SolverParameter & solver) {
-    net_ = shared_ptr<NeuralNet<DataType> >(new NeuralNet<DataType>);
+    this->net_ = shared_ptr<NeuralNet<DataType> >(new NeuralNet<DataType>);
     NetParameter net_p;
     int status = snoopy::io::read_net_proto_from_text_file(solver.net(), net_p);
     if (status != snoopy::SUCCESS) {
         return snoopy::FAILURE;
     }
-    net_->init(net_p);
+    this->net_->init(net_p);
     base_lr_ = solver.base_lr();
     momentum_ = solver.momentum(); 
     max_epochs_ = solver.epochs();
@@ -71,8 +60,8 @@ int SGDSolver<DataType>::update() {
     DataType loss = static_cast<DataType>(0);
     //create previos blob with momentum
     vector<shared_ptr<Blob<DataType> > > history_param_matrix_vec;
-    vector<Blob<DataType> *> para_vector = net_->get_learnable_para_blobs();
-    DataFeedLayer<DataType> * data_feed = static_cast<DataFeedLayer<DataType> *>(net_->get_input_feed().get());
+    vector<Blob<DataType> *> para_vector = this->net_->get_learnable_para_blobs();
+    DataFeedLayer<DataType> * data_feed = static_cast<DataFeedLayer<DataType> *>(this->net_->get_input_feed().get());
 
     for (int para_index = 0; para_index < para_vector.size(); ++
             para_index) {
@@ -93,9 +82,9 @@ int SGDSolver<DataType>::update() {
         cerr << "epoch_index: " << epoch_index << endl;
         for (int iter_index = 0; !data_feed->is_end(); ++iter_index) {
             cerr << "epoch_index: " << epoch_index << " iter_index: " << iter_index << endl;
-            data_feed->get_data(net_->get_input_blobs());
-            net_->forward(&loss);
-            net_->backprop();
+            data_feed->get_data(this->net_->get_input_blobs());
+            this->net_->forward(&loss);
+            this->net_->backprop();
             //update the learnabel parameter
             for (int para_index = 0; para_index < para_vector.size(); ++
                     para_index) {
@@ -106,7 +95,7 @@ int SGDSolver<DataType>::update() {
 
                derivate_matrix = history_param_matrix * momentum_;
                derivate_matrix = derivate_matrix - para_diff_matrix * 
-                   (base_lr_ * net_->get_learnable_para_lr()[para_index]);
+                   (base_lr_ * this->net_->get_learnable_para_lr()[para_index]);
 
                para_matrix = para_matrix + derivate_matrix;  
                history_param_matrix.copy_from(derivate_matrix);
@@ -117,18 +106,6 @@ int SGDSolver<DataType>::update() {
 
     return snoopy::SUCCESS;
 }
-
-template <typename DataType>
-int SGDSolver<DataType>::save_model() {
-    return snoopy::SUCCESS;
-}
-
-
-template <typename DataType>
-int SGDSolver<DataType>::evaluate_model() {
-    return snoopy::SUCCESS;
-}
-
 
 }
 }
