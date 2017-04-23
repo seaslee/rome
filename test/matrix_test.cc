@@ -105,6 +105,7 @@ TEST(Matrix, matrix_sum_test) {
   Matrix<float, 1> m4 = sum(m1, 2);
   Matrix<float, 1> temp2 { 15 };
   EXPECT_EQ(m4, temp2);
+  cerr << "step 1" << endl;
 
   MatrixShape<2> s{1,3};
   Matrix<float, 2> m5(s);

@@ -4,10 +4,10 @@ FIND_PATH(
      NAMES
      cblas.h 
      PATHS
-     /usr/local/Cellar/openblas/0.2.18_2/include
+     /usr/local/OpenBLAS/include
 )
 
 FIND_LIBRARY(
    OpenBlas_LIBRARIES NAMES  openblas
-   PATHS /usr/local/Cellar/openblas/0.2.18_2/lib
+   PATHS /usr/local/OpenBLAS/lib
 )

@@ -5,6 +5,7 @@
 #include "nn.h"
 #include "solver.h"
 #include "../proto/snoopy.pb.h"
+#include "../common/logging.h"
 
 //using namespace std;
 using std::shared_ptr;
@@ -76,7 +77,11 @@ int SGDSolver<DataType>::update() {
        history_param_matrix_vec.push_back(tmp);
     }
     //feed data
-    data_feed->read_file();
+    int status = data_feed->read_file();
+    if (status == snoopy::FAILURE) {
+        LOG_FATAL << "load data file failure, please check data" << endl;
+        return snoopy::FAILURE;
+    }
 
     for (int epoch_index = 0; epoch_index < max_epochs_; ++epoch_index) {
         cerr << "epoch_index: " << epoch_index << endl;
@@ -103,7 +108,6 @@ int SGDSolver<DataType>::update() {
         }
         data_feed->clear();
     }
-
     return snoopy::SUCCESS;
 }
 

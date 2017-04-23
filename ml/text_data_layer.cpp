@@ -19,21 +19,24 @@ void TextDataFeedLayer<DataType>::init_spec_layer(const vector<Blob<DataType> *>
 }
 
 template <typename DataType>
-void TextDataFeedLayer<DataType>::read_file() {
+int TextDataFeedLayer<DataType>::read_file() {
    ifstream in(this->data_param_.filepath().c_str());
    char buffer[1024];
    std::vector<std::string> token_list1;
    std::vector<std::string> token_list2;
    if (!in.is_open()) {
        LOG_FATAL << "Error open filepath " << this->data_param_.filepath();
+       return snoopy::FAILURE;
    }
    std::vector<std::vector<int> > tmp_vec1;
    std::vector<int> tmp_vec2;
    for (int i = 0; i < this->data_param_.max_line() && !in.eof(); ++i) {
-       in.getline(buffer, 1024);
+       if (!in.getline(buffer, 1024)) {
+           break;
+       }
        split(buffer, token_list1, ";");
        if (token_list1.size() == 0) {
-           return;
+           continue;
        }
        tmp_vec1.clear();
        for (int j = 0; j < token_list1.size(); ++ j) {
@@ -46,6 +49,7 @@ void TextDataFeedLayer<DataType>::read_file() {
        }
        data_.push_back(tmp_vec1);
    }
+   return snoopy::SUCCESS;
 }
 
 template <typename DataType>

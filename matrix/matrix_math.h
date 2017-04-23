@@ -260,10 +260,14 @@ Matrix<DataType, 1> max(const Matrix<DataType, N> &m, vector<int> &temp_index,
     Matrix<DataType, 1> temp(sh);
     for (int i = 0; i < m.get_row(); ++i) {
       for (int j = 0; j < m.get_column(); ++j) {
-        if (temp[0] < m[i][j]) {
-          temp[0] = m[i][j];
-          temp_index[0] = i;
-          temp_index[1] = j;
+        if (i == 0 && j == 0) {
+            temp[0] = m[0][0];
+            temp_index[0] = 0;
+            temp_index[1] = 0;
+        } else if (temp[0] < m[i][j]) {
+            temp[0] = m[i][j];
+            temp_index[0] = i;
+            temp_index[1] = j;
         }
       }
     }

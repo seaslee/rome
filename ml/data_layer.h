@@ -12,7 +12,7 @@ class DataFeedLayer : public Layer<DataType> {
        explicit DataFeedLayer(const LayerParameter & para) :
          Layer<DataType>(para) {}
         virtual void clear() = 0;
-        virtual void read_file() = 0;
+        virtual int read_file() = 0;
         virtual bool is_end() = 0;
         virtual int get_data(std::vector<matrix::Blob<DataType> *> & output_blob) = 0;
 

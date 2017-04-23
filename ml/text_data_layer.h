@@ -32,7 +32,7 @@ class TextDataFeedLayer : public DataFeedLayer<DataType> {
            return is_end_; 
         }
 
-        virtual void read_file();
+        virtual int read_file();
 
         virtual int get_data(std::vector<matrix::Blob<DataType> *> & output_blob);
         inline virtual int exact_bottom_blob() {return 0;}

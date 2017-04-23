@@ -26,6 +26,9 @@ inline Matrix<DataType, N>::Matrix(const MatrixShape<N> &s)
       stride(s[N - 1]),
       capicity(get_length(s, s[N - 1])),
       data(new storage::Buffer<DataType>(new storage::CPUallocator, capicity)){
+  if (data != nullptr) {
+    data->ref();
+  }
   row = 1;
   for (int i = 0; i < N - 1; ++i) {
     row *= shape[i];
@@ -58,6 +61,9 @@ inline Matrix<DataType, N>::Matrix(storage::Allocator * a,
       stride(st),
       capicity(get_length(s, s[N - 1])),
       data(new storage::Buffer<DataType>(a, capicity)){
+  if (data != nullptr) {
+    data->ref();
+  }
   row = 1;
   for (int i = 0; i < N - 1; ++i) {
     row *= shape[i];
@@ -510,6 +516,9 @@ inline Matrix<DataType, 1>::Matrix(storage::Allocator * a,
       data(new DataType[capicity]),
       row(1),
       column(shape[0]) {
+  if (data != nullptr) {
+    data->ref();
+  }
 }
 
 template<typename DataType>
@@ -522,6 +531,9 @@ inline Matrix<DataType, 1>::Matrix(storage::Allocator * a,
       data(new DataType[capicity]),
       row(1),
       column(shape[0]) {
+  if (data != nullptr) {
+    data->ref();
+  }
 }
 
 template<typename DataType>
@@ -532,6 +544,9 @@ inline Matrix<DataType, 1>::Matrix(const MatrixShape<1> &s)
       data(new storage::Buffer<DataType>(new storage::CPUallocator, capicity)),
       row(1),
       column(s[0]) {
+  if (data != nullptr) {
+    data->ref();
+  }
 }
 
 

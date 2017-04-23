@@ -1,10 +1,10 @@
-# project 
+# project
 project(snoopy)
-cmake_minimum_required(VERSION 3.6) 
+cmake_minimum_required(VERSION 3.5)
 option(test "Build all tests." ON)
 
 set(CMAKE_SOURCE_DIR .)
-set(CMAKE_MODULE_PATH ${CMAKE_ROOT}/Modules ${CMAKE_SOURCE_DIR}/cmake/modules) 
+set(CMAKE_MODULE_PATH ${CMAKE_ROOT}/Modules ${CMAKE_SOURCE_DIR}/cmake/modules)
 
 #c++11 support
 set(CMAKE_CXX_STANDARD 11)
@@ -29,7 +29,7 @@ add_subdirectory(test)
 find_package(libOpenBlas REQUIRED)
 mark_as_advanced(
     OpenBlas_INCLUDE_DIR
-    OpenBlas_LIBRARIES 
+    OpenBlas_LIBRARIES
 )
 #if (OpenBlas_INCLUDE_DIR AND OpenBlas_LIBRARIES)
 #  include_directories(${OpenBlas_INCLUDE_DIR})
@@ -40,7 +40,7 @@ mark_as_advanced(
 ################
 #test
 ################
-#if (test) 
+#if (test)
 message("enter test")
 add_executable(io_test  test/io_test.cc)
 add_executable(matrix_test  test/matrix_test.cc)
